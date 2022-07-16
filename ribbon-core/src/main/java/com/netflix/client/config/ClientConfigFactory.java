@@ -31,7 +31,9 @@ public interface ClientConfigFactory {
     default int getPriority() { return 0; }
 
     static ClientConfigFactory findDefaultConfigFactory() {
-        return StreamSupport.stream(ServiceLoader.load(ClientConfigFactory.class).spliterator(), false)
+      // 通过SPI机制加载 ribbon-archaius 中的 ArchaiusClientConfigFactory
+      ServiceLoader<ClientConfigFactory> serviceLoader = ServiceLoader.load(ClientConfigFactory.class);
+      return StreamSupport.stream(serviceLoader.spliterator(), false)
                 .sorted(Comparator
                         .comparingInt(ClientConfigFactory::getPriority)
                         .thenComparing(Comparator.comparing(f -> f.getClass().getCanonicalName())))
