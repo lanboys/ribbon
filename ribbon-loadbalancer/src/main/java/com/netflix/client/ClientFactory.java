@@ -140,7 +140,8 @@ public class ClientFactory {
             return lb;
         } else {
             try {
-                lb = registerNamedLoadBalancerFromclientConfig(name, getNamedConfig(name));
+              IClientConfig clientConfig = getNamedConfig(name);
+              lb = registerNamedLoadBalancerFromclientConfig(name, clientConfig);
             } catch (ClientException e) {
                 throw new RuntimeException("Unable to create load balancer", e);
             }
@@ -243,6 +244,7 @@ public class ClientFactory {
      * @see #getNamedConfig(String, Class)
      */
     public static IClientConfig getNamedConfig(String name) {
+        // 使用默认的 IClientConfig
         return getNamedConfig(name, ClientConfigFactory.DEFAULT::newConfig);
     }
     
@@ -251,14 +253,19 @@ public class ClientFactory {
      * is created and {@link IClientConfig#loadProperties(String)} will be called.
      */
     public static IClientConfig getNamedConfig(String name, Class<? extends IClientConfig> clientConfigClass) {
+        // 使用自定义的 IClientConfig
         return getNamedConfig(name, factoryFromConfigType(clientConfigClass));
     }
 
     public static IClientConfig getNamedConfig(String name, Supplier<IClientConfig> factory) {
         return namedConfig.computeIfAbsent(name, ignore -> {
             try {
+                // factory：ArchaiusClientConfigFactory
+                // config：DefaultClientConfigImpl
                 IClientConfig config = factory.get();
+                // 加载配置文件中的值到 config 中
                 config.loadProperties(name);
+                // 加载完成
                 return config;
             } catch (Exception e) {
                 logger.error("Unable to create named client config '{}' instance for config factory {}", name, factory, e);

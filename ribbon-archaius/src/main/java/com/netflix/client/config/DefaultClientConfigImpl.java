@@ -577,14 +577,19 @@ public class DefaultClientConfigImpl implements IClientConfig {
     @Override
     public void loadProperties(String restClientName){
         enableDynamicProperties = true;
+        // 设置客户端名称
         setClientName(restClientName);
+        // 加载默认值
         loadDefaultValues();
-        Configuration props = ConfigurationManager.getConfigInstance().subset(restClientName);
+        // 加载配置文件中的值，覆盖前面的默认值
+        Configuration props = ConfigurationManager.getConfigInstance().subset(restClientName);//子集
         for (Iterator<String> keys = props.getKeys(); keys.hasNext(); ){
             String key = keys.next();
             String prop = key;
             try {
+                // 如果不是默认命名空间的值不做处理
                 if (prop.startsWith(getNameSpace())){
+                    // 截取默认命名空间后面的值，如：ribbon.ReadTimeout  ->  ReadTimeout
                     prop = prop.substring(getNameSpace().length() + 1);
                 }
                 setPropertyInternal(prop, getStringValue(props, key));
